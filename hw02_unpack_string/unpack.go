@@ -16,16 +16,14 @@ func Unpack(text string) (string, error) {
 		if unicode.IsDigit(currentRune) {
 			return "", errors.New("некорректная строка")
 		}
-		var nextRune rune
-		if i < len(text)-1 {
-			nextRune = rune(text[i+1])
+		nextRune := getNextRune(text, i)
+		if nextRune != 0 {
 			if currentRune == '\\' {
 				if unicode.IsDigit(nextRune) || nextRune == '\\' {
 					currentRune = nextRune
 					i++
-					if i < len(text)-1 {
-						nextRune = rune(text[i+1])
-					} else {
+					nextRune = getNextRune(text, i)
+					if nextRune == 0 {
 						sb.WriteRune(currentRune)
 						continue
 					}
@@ -49,5 +47,11 @@ func Unpack(text string) (string, error) {
 		}
 	}
 	return sb.String(), nil
-	return "", nil
+}
+
+func getNextRune(text string, i int) rune {
+	if i < len(text)-1 {
+		return rune(text[i+1])
+	}
+	return 0
 }
