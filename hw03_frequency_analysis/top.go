@@ -22,14 +22,14 @@ func Top10(text string) []string {
 	words := re.Split(text, -1)
 	dictionary := make(map[string]int)
 	for i := range words {
-		if _, ok := dictionary[words[i]]; ok {
-			dictionary[words[i]]++
-		} else {
+		if _, ok := dictionary[words[i]]; !ok {
 			dictionary[words[i]] = 1
+		} else {
+			dictionary[words[i]]++
 		}
 	}
 
-	countedWords := make([]Word, len(dictionary))
+	countedWords := make([]Word, 0)
 	for k, v := range dictionary {
 		if len(k) > 0 {
 			countedWords = append(countedWords, Word{text: k, count: v})
