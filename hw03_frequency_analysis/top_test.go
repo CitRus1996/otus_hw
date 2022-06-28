@@ -43,6 +43,46 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var ENText = `Humanity has a lot of problems. Most of them are  local
+	and do not affect the global community but there are a few global
+	issues. A global issue is an issue that affects every country  in 
+	the world. People can clearly define them, however they are still
+	not solved. One of the greatest challenges of our time is solving
+	global problems.
+		The United Nations is the  organization  that  defines  these
+	problems and takes measures to solve them. The United Nations  is
+	an example of cooperation of the  world-leading  countries.  They 
+	want to make our world a better place.
+		So, what global issues do they solve?  First,  it  is  global 
+	warming. Our industrial activity causes a  rise  in  the  average 
+	temperature. It means  that  an  average  summer  or  winter  day 
+	nowadays is warmer than  it  was  a  hundred  years  ago.  Global 
+	warming is  dangerous  because  it  can  cause  ice  melting.  If 
+	glaciers melt, the sea level will rise, and most  coastal  cities 
+	and islands will be drowned.
+		Second, it is human impact on the environment. In some cities
+	air pollution reached the point where it is dangerous  for  human
+	health. Our plants, factories, cars produce  a  lot  of  CO2  and
+	various pollutants.
+		Third, overpopulation. The population of our  planet  is  7.8
+	billion now, which is almost 8  times  as  much  as  it  was  two 
+	hundred years ago. It will keep growing,  and  the  planet  might 
+	just not be able to sustain that many inhabitants in the  future. 
+	Overpopulation causes multiple problems  including  poverty.  Did 
+	you know that 42 percent of people from Sub-Saharan Africa  still
+	live below the poverty line? The international  poverty  line  is 
+	1.9 dollars per day. People cannot fulfill their basic needs such
+	as food, water and clothing.
+		These are the most discussed global problems nowadays.  Their
+	list might increase but all the problems  are  being  worked  on. 
+	Some countries decided to switch to alternative energy sources in
+	the nearest future. Most countries at least recognize the 
+	problems.
+		In conclusion,  I  would  like  to  say  that  not  only  the 
+	governments are responsible for  our  planet,  but  every  single 
+	human as well. If we want to make the world a  better  place,  we 
+	should realize that even small actions affect it.`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -78,5 +118,27 @@ func TestTop10(t *testing.T) {
 			}
 			require.Equal(t, expected, Top10(text))
 		}
+	})
+}
+
+func TestENTop10(t *testing.T) {
+	t.Run("no words in empty string", func(t *testing.T) {
+		require.Len(t, Top10(""), 0)
+	})
+
+	t.Run("positive test", func(t *testing.T) {
+		expected := []string{
+			"the",    // 18
+			"is",     // 12
+			"of",     // 9
+			"a",      // 7
+			"and",    // 7
+			"global", // 7
+			"that",   // 7
+			"to",     // 7
+			"are",    // 6
+			"it",     // 6
+		}
+		require.Equal(t, expected, Top10(ENText))
 	})
 }
