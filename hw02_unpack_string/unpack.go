@@ -21,17 +21,11 @@ const (
 func Unpack(text string) (string, error) {
 	var sb strings.Builder
 	var state State
-	var prev, curr rune
+	var prev rune
 	if len(text) == 0 {
 		return "", nil
 	}
-	for i := 0; i < len(text); i++ {
-		curr = rune(text[i])
-
-		if state != None {
-			prev = rune(text[i-1])
-		}
-
+	for _, curr := range text {
 		if curr == '\\' {
 			if state != Screen {
 				state = Screen
@@ -39,19 +33,23 @@ func Unpack(text string) (string, error) {
 				state = Print
 				sb.WriteRune(curr)
 			}
+			prev = curr
 			continue
 		}
 
 		if unicode.IsLetter(curr) {
 			state = Print
 			sb.WriteRune(curr)
+			prev = curr
 			continue
 		}
 
 		if err := handleDigit(&sb, prev, curr, &state); err != nil {
 			return "", err
 		}
+		prev = curr
 	}
+
 	return sb.String(), nil
 }
 
