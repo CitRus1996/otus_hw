@@ -18,8 +18,8 @@ type ListItem struct {
 
 type list struct {
 	// Place your code here.
-	first *ListItem
-	last  *ListItem
+	front *ListItem
+	back  *ListItem
 	len   int
 }
 
@@ -32,11 +32,11 @@ func (l *list) Len() int {
 }
 
 func (l *list) Front() *ListItem {
-	return l.first
+	return l.front
 }
 
 func (l *list) Back() *ListItem {
-	return l.last
+	return l.back
 }
 
 func (l *list) PushFront(v interface{}) *ListItem {
@@ -46,12 +46,12 @@ func (l *list) PushFront(v interface{}) *ListItem {
 		Prev:  nil,
 	}
 	if l.Len() == 0 {
-		l.first = item
-		l.last = item
+		l.front = item
+		l.back = item
 	} else {
-		item.Next = l.first
-		l.first.Prev = item
-		l.first = item
+		item.Next = l.front
+		item.Next.Prev = item
+		l.front = item
 	}
 	l.len++
 	return item
@@ -64,42 +64,55 @@ func (l *list) PushBack(v interface{}) *ListItem {
 		Prev:  nil,
 	}
 	if l.Len() == 0 {
-		l.first = item
-		l.last = item
+		l.front = item
+		l.back = item
 	} else {
-		item.Prev = l.last
-		l.last.Next = item
-		l.last = item
+		item.Prev = l.back
+		item.Prev.Next = item
+		l.back = item
 	}
 	l.len++
 	return item
 }
 
 func (l *list) Remove(i *ListItem) {
-	if i == l.first {
-		l.first = i.Next
-		l.first.Prev = nil
-		return
-	}
-	if i == l.last {
-		l.last = i.Prev
-		l.last.Next = nil
-	}
-	i.Prev.Next = i.Next
-	i.Next.Prev = i.Prev
 	l.len--
-}
-
-func (l *list) MoveToFront(i *ListItem) {
-	if i.Prev == nil {
+	if l.Len() == 0 {
+		l.front = nil
+		l.back = nil
 		return
+	}
+	if i == l.front {
+		l.front = i.Next
+		l.front.Prev = nil
+		return
+	}
+	if i == l.back {
+		l.back = i.Prev
+		l.back.Next = nil
+		return
+	}
+	if i.Prev != nil {
+		i.Prev.Next = i.Next
 	}
 	if i.Next != nil {
 		i.Next.Prev = i.Prev
 	}
+}
+
+func (l *list) MoveToFront(i *ListItem) {
+	if i == l.front {
+		return
+	}
+	if i == l.back {
+		l.back = i.Prev
+	}
 	i.Prev.Next = i.Next
-	i.Next = l.first
+	if i.Next != nil {
+		i.Next.Prev = i.Prev
+	}
+	i.Next = l.front
+	l.front.Prev = i
+	l.front = i
 	i.Prev = nil
-	l.first.Prev = i
-	l.first = i
 }
