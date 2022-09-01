@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -12,48 +13,54 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	wg := new(sync.WaitGroup)
+	var wg sync.WaitGroup
+	errCount := new(int32)
 	taskChan := make(chan Task, len(tasks))
-	errChan := make(chan error, len(tasks))
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	for i := range tasks {
 		taskChan <- tasks[i]
 	}
+	close(taskChan)
 
-	wg.Add(n)
 	for j := 0; j < n; j++ {
-		go RunWorker(ctx, taskChan, errChan, wg, m)
+		wg.Add(1)
+		go RunWorker(ctx, taskChan, errCount, &wg)
 	}
-	wg.Wait()
 
 	if m > 0 {
-		if len(errChan) >= m {
-			return ErrErrorsLimitExceeded
+		for {
+			if int(*errCount) >= m {
+				return ErrErrorsLimitExceeded
+			}
+			if len(taskChan) == 0 {
+				break
+			}
 		}
+
 	}
+	wg.Wait()
 
 	return nil
 }
 
-func RunWorker(ctx context.Context, tasks chan Task, errChan chan error, wg *sync.WaitGroup, m int) {
+func RunWorker(ctx context.Context, tasks chan Task, errCounter *int32, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case task := <-tasks:
-			err := task()
-			if m > 0 {
-				if err != nil {
-					errChan <- err
-					if len(errChan) >= m {
-						ctx.Done()
-						return
-					}
-				}
+		case task, ok := <-tasks:
+			if !ok {
+				return
 			}
-		default:
-			return
+
+			err := task()
+			if err != nil {
+				atomic.AddInt32(errCounter, 1)
+			}
 		}
 	}
 }
