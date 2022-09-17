@@ -30,13 +30,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
+	defer sourceFile.Close()
 
-	dataReader := io.NewSectionReader(sourceFile, offset, limit+1)
+	dataReader := io.NewSectionReader(sourceFile, offset, limit)
 
 	targetFile, err := os.OpenFile(toPath, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
+	defer targetFile.Close()
 
 	_, err = io.Copy(targetFile, dataReader)
 	if err != nil {

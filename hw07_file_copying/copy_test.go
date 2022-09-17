@@ -101,6 +101,8 @@ func TestCopy(t *testing.T) {
 				t.Fatalf("can't read result file: %s", err)
 			}
 
+			os.Remove(testCase.targetPath)
+
 			require.ErrorIs(t, err, testCase.expectedErr)
 			require.Equal(t, expectedFileData, resultFileData)
 		})
